@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom HSL variables for dynamic theme mapping */
+:root {
+  --hue-coffee: 24;
+  --hue-caramel: 28;
+  --hue-gold: 38;
+  --bg-primary: hsl(var(--hue-coffee), 25%, 98%);
+  --bg-secondary: hsl(var(--hue-coffee), 20%, 93%);
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --border-color: hsla(var(--hue-coffee), 20%, 20%, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg-primary: hsl(var(--hue-coffee), 8%, 7%);
+  --bg-secondary: hsl(var(--hue-coffee), 8%, 11%);
+  --bg-card: rgba(20, 18, 16, 0.75);
+  --border-color: hsla(var(--hue-coffee), 15%, 85%, 0.06);
+}
+
+body {
+  background-color: var(--bg-primary);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base custom classes to support steam and glassmorphism easily in Tailwind context */
+@layer utilities {
+  .steam-container {
+    display: flex;
+    gap: 12px;
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .steam-line {
+    width: 6px;
+    height: 40px;
+    background: linear-gradient(to top, rgba(133, 133, 133, 0.95), transparent);
+    border-radius: 99px;
+    filter: blur(2px);
+    animation: steam 3s infinite ease-in-out;
+  }
+
+  .steam-line:nth-child(2) {
+    animation-delay: 0.8s;
+    height: 55px;
+  }
+
+  .steam-line:nth-child(3) {
+    animation-delay: 1.6s;
+    height: 30px;
+  }
+
+  .glass-panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+  }
+}
+
+@keyframes steam {
+  0% {
+    transform: translateY(20px) scaleY(0.5) skewX(0deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateY(-10px) scaleY(1.3) skewX(8deg);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: translateY(-40px) scaleY(0.8) skewX(-8deg);
+    opacity: 0;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--hue-coffee), 10%, 50%);
+}
+
+/* Roast badges styling */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+}
+
+/* Claro / Light Roast */
+.badge-claro, .badge-Claro {
+  background-color: hsl(38, 70%, 93%);
+  color: hsl(38, 70%, 30%);
+}
+[data-theme="dark"] .badge-claro, [data-theme="dark"] .badge-Claro {
+  background-color: hsla(38, 70%, 50%, 0.15);
+  color: hsl(38, 70%, 75%);
+}
+
+/* Medio / Medium Roast */
+.badge-medio, .badge-Medio {
+  background-color: hsl(28, 65%, 90%);
+  color: hsl(28, 65%, 35%);
+}
+[data-theme="dark"] .badge-medio, [data-theme="dark"] .badge-Medio {
+  background-color: hsla(28, 65%, 45%, 0.15);
+  color: hsl(28, 65%, 75%);
+}
+
+/* Oscuro / Dark Roast */
+.badge-oscuro, .badge-Oscuro {
+  background-color: hsl(24, 30%, 88%);
+  color: hsl(24, 30%, 25%);
+}
+[data-theme="dark"] .badge-oscuro, [data-theme="dark"] .badge-Oscuro {
+  background-color: hsla(24, 40%, 25%, 0.3);
+  color: hsl(24, 30%, 75%);
+}
