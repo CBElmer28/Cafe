@@ -14,7 +14,7 @@
       "type": "n8n-nodes-base.githubTrigger",
       "typeVersion": 1,
       "position": [
-        250,
+        100,
         300
       ]
     },
@@ -27,7 +27,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        450,
+        300,
         300
       ]
     },
@@ -48,9 +48,93 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        650,
+        500,
         300
       ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.toString() }}",
+            "Commit": "={{ $('GitHub Trigger').item.json.body.head_commit.id.substring(0, 7) }}",
+            "Message": "={{ $('GitHub Trigger').item.json.body.head_commit.message }}",
+            "Author": "={{ $('GitHub Trigger').item.json.body.head_commit.author.name }}",
+            "Result": "SUCCESS"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "google-sheets-success-id",
+      "name": "Google Sheets Success",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        750,
+        150
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-credentials",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now.toString() }}",
+            "Commit": "={{ $('GitHub Trigger').item.json.body.head_commit.id.substring(0, 7) }}",
+            "Message": "={{ $('GitHub Trigger').item.json.body.head_commit.message }}",
+            "Author": "={{ $('GitHub Trigger').item.json.body.head_commit.author.name }}",
+            "Result": "FAIL"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "google-sheets-failure-id",
+      "name": "Google Sheets Failure",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        750,
+        450
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-credentials",
+          "name": "Google Sheets Account"
+        }
+      }
     },
     {
       "parameters": {
@@ -65,8 +149,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.1,
       "position": [
-        900,
-        400
+        1000,
+        550
       ]
     },
     {
@@ -81,8 +165,8 @@
       "type": "n8n-nodes-base.github",
       "typeVersion": 1,
       "position": [
-        900,
-        200
+        1000,
+        350
       ]
     }
   ],
@@ -111,8 +195,19 @@
     },
     "If Tests Passed": {
       "main": [
-        [],
         [
+          {
+            "node": "Google Sheets Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets Failure",
+            "type": "main",
+            "index": 0
+          },
           {
             "node": "GitHub Issue",
             "type": "main",
