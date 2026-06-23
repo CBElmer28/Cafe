@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "command": "docker run --rm -v c:/Users/User/Desktop/Cafe/backend:/var/www/html -w /var/www/html lorisleiva/laravel-docker:8.2 sh -c \"if [ ! -d vendor ]; then composer install --no-interaction --prefer-dist; fi && php artisan test\""
+        "command": "docker run --rm -v c:/Users/User/Desktop/Cafe/backend:/var/www/html -w /var/www/html lorisleiva/laravel-docker:8.2 sh -c \"if [ ! -d vendor ]; then composer install --no-interaction --prefer-dist; fi && php artisan test; echo \\\"EXIT_CODE=\\$?\\\"\""
       },
       "id": "execute-command-id",
       "name": "Execute Command",
@@ -37,11 +37,10 @@
     {
       "parameters": {
         "conditions": {
-          "number": [
+          "boolean": [
             {
-              "value1": "={{ $json.exitCode }}",
-              "operation": "equal",
-              "value2": 0
+              "value1": "={{ $json.stdout && $json.stdout.includes('EXIT_CODE=0') }}",
+              "value2": true
             }
           ]
         }
@@ -52,7 +51,7 @@
       "typeVersion": 1,
       "position": [
         500,
-        300
+        500
       ]
     },
     {
@@ -142,7 +141,7 @@
     {
       "parameters": {
         "chatId": "8838260795",
-        "text": "=🚨 *¡Las pruebas de Cafe han fallado!* 🚨\n\nEl último commit no pasó los tests de integración.\n\n*Logs de error:*\n```\n{{ ($json.stderr || $json.stdout || '').slice(0, 3000) }}\n```",
+        "text": "=🚨 *¡Las pruebas de Cafe han fallado!* 🚨\n\nEl último commit no pasó los tests de integración.\n\n*Logs de error:*\n```\n{{ ($json.stdout || '').replace(/EXIT_CODE=\\d+/, '').slice(0, 3000) }}\n```",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -161,7 +160,7 @@
         "owner": "CBElmer28",
         "repository": "Cafe",
         "title": "={{ (() => { const stdout = $json.stdout || ''; const summaryMatch = stdout.match(/Tests:\\s+(\\d+\\s+failed[^\\n]*)/); const summary = summaryMatch ? summaryMatch[1].trim() : 'Tests failed'; const failedMatch = stdout.match(/FAILED\\s+([^\\n]+)/); const detail = failedMatch ? ' (' + failedMatch[1].trim() + ')' : ''; return '🚨 CI/CD Failure: ' + summary + detail; })() }}",
-        "body": "=Las pruebas automatizadas del proyecto Cafe fallaron en el último push.\n\n**Detalles del error:**\n```\n{{ ($json.stderr || $json.stdout || '').slice(0, 5000) }}\n```"
+        "body": "=Las pruebas automatizadas del proyecto Cafe fallaron en el último push.\n\n**Detalles del error:**\n```\n{{ ($json.stdout || '').replace(/EXIT_CODE=\\d+/, '').slice(0, 5000) }}\n```"
       },
       "id": "github-issue-id",
       "name": "GitHub Issue",
