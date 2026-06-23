@@ -139,3 +139,50 @@ Sigue estos pasos para poner en marcha el proyecto localmente.
   * *Costa Rica Tarrazú Honey* (Tueste Medio)
   * *Brasil Cerrado Dulce* (Tueste Oscuro)
   * *Café Espresso Blend Premium* (Tueste Oscuro)
+
+---
+
+## 🔄 Integración Continua (CI/CD) con n8n y Docker
+
+El proyecto cuenta con un pipeline de CI/CD completamente automatizado mediante un stack de **n8n** y **ngrok** que corre localmente en contenedores de Docker. En cada `git push` a tu repositorio, el flujo ejecutará las pruebas unitarias del backend en un entorno aislado de Laravel Docker, guardará los resultados históricos en Google Sheets y, si hay fallos, creará un issue dinámico en GitHub y te enviará una alerta de Telegram con los logs detallados del error.
+
+### 1. Levantar el Stack Local (Docker)
+
+1. En la raíz del proyecto, asegúrate de tener configurado tu token de ngrok en `n8n.env` (`NGROK_AUTHTOKEN`).
+2. Levanta los contenedores en segundo plano:
+   ```bash
+   docker compose up -d
+   ```
+   *Esto iniciará la suite de n8n en el puerto `5678` y el túnel de ngrok en segundo plano.*
+
+3. Obtén la URL HTTPS pública de tu túnel ngrok abriendo el panel de control de ngrok en `http://localhost:4040` (o ejecutando `docker logs ngrok_cafe_tunnel`). Copia la URL que termine en `.ngrok-free.dev`.
+4. Abre `n8n.env` y actualiza la variable `WEBHOOK_URL` con tu URL copiada (ej. `WEBHOOK_URL=https://tu-subdominio.ngrok-free.dev`).
+5. Reinicia el contenedor de n8n para aplicar el webhook y activar el registro correcto:
+   ```bash
+   docker compose restart n8n
+   ```
+
+---
+
+### 2. Importar y Configurar el Workflow en n8n
+
+1. Entra al editor de n8n en tu navegador: `http://localhost:5678` (crea una cuenta local si es la primera vez).
+2. Haz clic en el menú de los tres puntos en la esquina superior derecha y selecciona **Import from File**. Elige el archivo [n8n_workflow.json](file:///c:/Users/User/Desktop/Cafe/n8n_workflow.json) ubicado en la raíz del proyecto.
+3. Configura las credenciales de los nodos:
+   * **GitHub Trigger**: Haz doble clic, haz clic en *Create New Credential* y conecta tu cuenta personal de GitHub con acceso a tu repositorio `Cafe`. Asegúrate de que el propietario sea tu usuario y el repositorio sea `Cafe`.
+   * **Google Sheets Success & Failure**: Conecta tu cuenta de Google (OAuth2) y selecciona tu hoja de cálculo (`Cafe CI/CD Logs` o similar). Asegúrate de mapear las columnas `Date`, `Commit`, `Message`, `Author` y `Result` con las variables dinámicas de n8n.
+   * **GitHub Issue**: Configura tu cuenta de GitHub conectada y el repositorio `Cafe`.
+   * **Telegram Alerta**: Ya viene preconfigurado con el Chat ID de Telegram (`8838260795`) y el token del bot de pruebas. Puedes cambiarlo por tu propio bot si lo deseas.
+4. Haz clic en **Publish** (o pon el interruptor en **Active**) en la esquina superior derecha de n8n. Esto registrará de manera automática el webhook en la sección *Webhooks* de los ajustes de tu repositorio de GitHub.
+
+---
+
+### 3. Funcionamiento de la Ejecución y Alertas
+
+Cada vez que un compañero o tú hagan un `git push`:
+* **Ejecución interna**: El nodo `Execute Command` iniciará un contenedor efímero de Laravel Docker en tu máquina local (`lorisleiva/laravel-docker:8.2`), montará la carpeta `backend`, resolverá las dependencias si faltan y ejecutará `php artisan test`.
+* **Éxito**: Se registrará una fila con el resultado `SUCCESS` en tu hoja de Google Sheets.
+* **Fallo**: 
+  * Se registrará una fila `FAIL` en Google Sheets (pintada de rojo con formato condicional).
+  * Se creará un **GitHub Issue** dinámico cuyo título contiene el test exacto que falló y la descripción contiene las líneas del error en la consola.
+  * El bot de **Telegram** enviará un mensaje con formato Markdown que contiene el error y el bloque de código detallando la causa.
