@@ -141,8 +141,8 @@
     },
     {
       "parameters": {
-        "chatId": "TU_CHAT_ID_DE_TELEGRAM",
-        "text": "🚨 *¡Las pruebas de Cafe han fallado!* 🚨\n\nEl último commit no pasó los tests de integración.\n\n*Logs de error:*\n```\n{{ $node[\"Execute Command\"].json[\"stderr\"] || $node[\"Execute Command\"].json[\"stdout\"] }}\n```",
+        "chatId": "8838260795",
+        "text": "=🚨 *¡Las pruebas de Cafe han fallado!* 🚨\n\nEl último commit no pasó los tests de integración.\n\n*Logs de error:*\n```\n{{ ($json.stderr || $json.stdout || '').slice(0, 3000) }}\n```",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -160,8 +160,8 @@
       "parameters": {
         "owner": "CBElmer28",
         "repository": "Cafe",
-        "title": "🚨 CI/CD Failure: Pruebas automatizadas fallidas",
-        "body": "Las pruebas automatizadas del proyecto Cafe fallaron en el último push.\n\n**Detalles del error:**\n```\n{{ $node[\"Execute Command\"].json[\"stderr\"] || $node[\"Execute Command\"].json[\"stdout\"] }}\n```"
+        "title": "={{ (() => { const stdout = $json.stdout || ''; const summaryMatch = stdout.match(/Tests:\\s+(\\d+\\s+failed[^\\n]*)/); const summary = summaryMatch ? summaryMatch[1].trim() : 'Tests failed'; const failedMatch = stdout.match(/FAILED\\s+([^\\n]+)/); const detail = failedMatch ? ' (' + failedMatch[1].trim() + ')' : ''; return '🚨 CI/CD Failure: ' + summary + detail; })() }}",
+        "body": "=Las pruebas automatizadas del proyecto Cafe fallaron en el último push.\n\n**Detalles del error:**\n```\n{{ ($json.stderr || $json.stdout || '').slice(0, 5000) }}\n```"
       },
       "id": "github-issue-id",
       "name": "GitHub Issue",
