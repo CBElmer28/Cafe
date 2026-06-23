@@ -1,6 +1,6 @@
 # Aroma Real - Tienda de Café de Especialidad
 
-Este es el repositorio monorepo de pollito **Aroma Real**, una plataforma de comercio electrónico de café de especialidad. La plataforma cuenta con una arquitectura desacoplada conformada por un backend (API RESTful en Laravel 10) y un frontend (Single Page Application en Vue 3).
+Este es el repositorio monorepo **Aroma Real**, una plataforma de comercio electrónico de café de especialidad. La plataforma cuenta con una arquitectura desacoplada conformada por un backend (API RESTful en Laravel 10) y un frontend (Single Page Application en Vue 3).
 
 ---
 
