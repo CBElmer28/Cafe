@@ -1,0 +1,137 @@
+{
+  "name": "Cafe CI/CD Tests",
+  "nodes": [
+    {
+      "parameters": {
+        "repository": "Cafe",
+        "owner": "CBElmer28",
+        "events": [
+          "push"
+        ]
+      },
+      "id": "github-trigger-id",
+      "name": "GitHub Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "docker run --rm -v c:/Users/User/Desktop/Cafe/backend:/var/www/html -w /var/www/html lorisleiva/laravel-docker:8.2 sh -c \"composer install --no-interaction --prefer-dist && php artisan test\""
+      },
+      "id": "execute-command-id",
+      "name": "Execute Command",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.exitCode }}",
+              "operation": "equal",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "if-node-id",
+      "name": "If Tests Passed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "TU_CHAT_ID_DE_TELEGRAM",
+        "text": "🚨 *¡Las pruebas de Cafe han fallado!* 🚨\n\nEl último commit no pasó los tests de integración.\n\n*Logs de error:*\n```\n{{ $node[\"Execute Command\"].json[\"stderr\"] || $node[\"Execute Command\"].json[\"stdout\"] }}\n```",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-node-id",
+      "name": "Telegram Alerta",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "owner": "CBElmer28",
+        "repository": "Cafe",
+        "title": "🚨 CI/CD Failure: Pruebas automatizadas fallidas",
+        "body": "Las pruebas automatizadas del proyecto Cafe fallaron en el último push.\n\n**Detalles del error:**\n```\n{{ $node[\"Execute Command\"].json[\"stderr\"] || $node[\"Execute Command\"].json[\"stdout\"] }}\n```"
+      },
+      "id": "github-issue-id",
+      "name": "GitHub Issue",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        900,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "GitHub Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "If Tests Passed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Tests Passed": {
+      "main": [
+        [],
+        [
+          {
+            "node": "GitHub Issue",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Telegram Alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "staticData": null,
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

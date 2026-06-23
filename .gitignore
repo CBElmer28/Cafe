@@ -1,0 +1,3 @@
+# n8n and Ngrok local configuration
+n8n.env
+docker/
