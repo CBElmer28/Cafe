@@ -148,7 +148,10 @@ El proyecto cuenta con un pipeline de CI/CD completamente automatizado mediante 
 
 ### 1. Levantar el Stack Local (Docker)
 
-1. En la raíz del proyecto, asegúrate de tener configurado tu token de ngrok en `n8n.env` (`NGROK_AUTHTOKEN`).
+1. En la raíz del proyecto, copia el archivo de plantilla `n8n.env.example` a `n8n.env` y configura tu token de autenticación de ngrok (`NGROK_AUTHTOKEN`):
+   ```bash
+   cp n8n.env.example n8n.env
+   ```
 2. Levanta los contenedores en segundo plano:
    ```bash
    docker compose up -d
