@@ -29,7 +29,10 @@
       "position": [
         300,
         300
-      ]
+      ],
+      "settings": {
+        "onError": "continueRegularOutput"
+      }
     },
     {
       "parameters": {
