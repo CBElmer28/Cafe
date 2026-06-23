@@ -18,5 +18,14 @@ export default {
       console.error('Error tracking orders:', error);
       throw error;
     }
+  },
+  async getMyOrders() {
+    try {
+      const response = await OrderRepository.getMyOrders();
+      return response.data || [];
+    } catch (error) {
+      console.error('Error fetching my orders:', error);
+      throw error;
+    }
   }
 };
