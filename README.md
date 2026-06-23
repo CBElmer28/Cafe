@@ -173,7 +173,7 @@ El proyecto cuenta con un pipeline de CI/CD completamente automatizado mediante 
 2. Haz clic en el menú de los tres puntos en la esquina superior derecha y selecciona **Import from File**. Elige el archivo [n8n_workflow.json](file:///c:/Users/User/Desktop/Cafe/n8n_workflow.json) ubicado en la raíz del proyecto.
 3. Configura las credenciales de los nodos:
    * **GitHub Trigger**: Haz doble clic, haz clic en *Create New Credential* y conecta tu cuenta personal de GitHub con acceso a tu repositorio `Cafe`. Asegúrate de que el propietario sea tu usuario y el repositorio sea `Cafe`.
-   * **Google Sheets Success & Failure**: Conecta tu cuenta de Google (OAuth2) y selecciona tu hoja de cálculo (`Cafe CI/CD Logs` o similar). Asegúrate de mapear las columnas `Date`, `Commit`, `Message`, `Author` y `Result` con las variables dinámicas de n8n.
+   * **Google Sheets Success & Failure**: Conecta tu cuenta de Google (OAuth2) y selecciona tu hoja de cálculo (`Cafe CI/CD Logs` o similar). Asegúrate de mapear las columnas `Date`, `Commit`, `Message`, `Author`, `Result` y `Duration` con las variables dinámicas de n8n.
    * **GitHub Issue**: Configura tu cuenta de GitHub conectada y el repositorio `Cafe`.
    * **Telegram Alerta**: Ya viene preconfigurado con el Chat ID de Telegram (`8838260795`) y el token del bot de pruebas. Puedes cambiarlo por tu propio bot si lo deseas.
 4. Haz clic en **Publish** (o pon el interruptor en **Active**) en la esquina superior derecha de n8n. Esto registrará de manera automática el webhook en la sección *Webhooks* de los ajustes de tu repositorio de GitHub.

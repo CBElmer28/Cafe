@@ -74,7 +74,8 @@
             "Commit": "={{ $('GitHub Trigger').item.json.body.head_commit.id.substring(0, 7) }}",
             "Message": "={{ $('GitHub Trigger').item.json.body.head_commit.message }}",
             "Author": "={{ $('GitHub Trigger').item.json.body.head_commit.author.name }}",
-            "Result": "SUCCESS"
+            "Result": "SUCCESS",
+            "Duration": "={{ $json.stdout.match(/Duration:\\s*([^\\n]+)/)?.[1]?.trim() || 'N/A' }}"
           },
           "matchingColumns": [],
           "schema": []
@@ -116,7 +117,8 @@
             "Commit": "={{ $('GitHub Trigger').item.json.body.head_commit.id.substring(0, 7) }}",
             "Message": "={{ $('GitHub Trigger').item.json.body.head_commit.message }}",
             "Author": "={{ $('GitHub Trigger').item.json.body.head_commit.author.name }}",
-            "Result": "FAIL"
+            "Result": "FAIL",
+            "Duration": "={{ $json.stdout.match(/Duration:\\s*([^\\n]+)/)?.[1]?.trim() || 'N/A' }}"
           },
           "matchingColumns": [],
           "schema": []
