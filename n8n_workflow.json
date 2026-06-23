@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "command": "docker run --rm -v c:/Users/User/Desktop/Cafe/backend:/var/www/html -w /var/www/html lorisleiva/laravel-docker:8.2 sh -c \"composer install --no-interaction --prefer-dist && php artisan test\""
+        "command": "docker run --rm -v c:/Users/User/Desktop/Cafe/backend:/var/www/html -w /var/www/html lorisleiva/laravel-docker:8.2 sh -c \"if [ ! -d vendor ]; then composer install --no-interaction --prefer-dist; fi && php artisan test\""
       },
       "id": "execute-command-id",
       "name": "Execute Command",
