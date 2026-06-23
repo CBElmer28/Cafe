@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use Exception;
 
 class AuthController extends Controller
@@ -18,7 +19,14 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
+            'password' => [
+                'required',
+                'string',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers(),
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -87,5 +95,25 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return $this->success($request->user(), 200);
+    }
+
+    public function refresh(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            // Eliminar el token actual para invalidarlo
+            $request->user()->currentAccessToken()->delete();
+
+            // Generar un nuevo token
+            $newToken = $user->createToken('auth_token')->plainTextToken;
+
+            return $this->success([
+                'access_token' => $newToken,
+                'token_type' => 'Bearer',
+            ], 200);
+        } catch (Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
     }
 }

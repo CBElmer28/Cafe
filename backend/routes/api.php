@@ -17,8 +17,8 @@ use App\Http\Controllers\AuthController;
 */
 
 // Rutas Públicas de Auth
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 // Rutas Públicas de Catálogo y Consulta
 Route::get('/products', [ProductController::class, 'index']);
@@ -29,6 +29,7 @@ Route::get('/orders/track', [OrderController::class, 'track']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
     
     Route::post('/checkout', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'myOrders']);

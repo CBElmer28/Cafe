@@ -5,6 +5,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
+    refreshIntervalId: null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
@@ -17,6 +18,7 @@ export const useAuthStore = defineStore('auth', {
           this.token = response.data.access_token;
           this.user = response.data.user;
           localStorage.setItem('token', this.token);
+          this.startTokenRefreshTimer();
           return response.data;
         }
         throw new Error(response.msg || 'Error en el inicio de sesión');
@@ -32,6 +34,7 @@ export const useAuthStore = defineStore('auth', {
           this.token = response.data.access_token;
           this.user = response.data.user;
           localStorage.setItem('token', this.token);
+          this.startTokenRefreshTimer();
           return response.data;
         }
         throw new Error(response.msg || 'Error en el registro');
@@ -51,6 +54,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = null;
         this.user = null;
         localStorage.removeItem('token');
+        this.stopTokenRefreshTimer();
       }
     },
     async fetchCurrentUser() {
@@ -59,6 +63,7 @@ export const useAuthStore = defineStore('auth', {
         const response = await AuthRepository.getMe();
         if (response.code === 200 && response.data) {
           this.user = response.data;
+          this.startTokenRefreshTimer();
           return this.user;
         }
         this.clearAuth();
@@ -73,6 +78,40 @@ export const useAuthStore = defineStore('auth', {
       this.token = null;
       this.user = null;
       localStorage.removeItem('token');
+      this.stopTokenRefreshTimer();
+    },
+    async refreshToken() {
+      try {
+        if (!this.token) return;
+        const response = await AuthRepository.refresh();
+        if (response.code === 200 && response.data) {
+          this.token = response.data.access_token;
+          localStorage.setItem('token', this.token);
+          return this.token;
+        }
+        throw new Error(response.msg || 'Error al refrescar el token');
+      } catch (error) {
+        console.error('Error refreshing token:', error);
+        this.clearAuth();
+        throw error;
+      }
+    },
+    startTokenRefreshTimer() {
+      this.stopTokenRefreshTimer();
+      // Refrescar cada 10 minutos (600,000 ms) ya que expira en 15 minutos
+      this.refreshIntervalId = setInterval(async () => {
+        try {
+          await this.refreshToken();
+        } catch (error) {
+          console.error('Error in scheduled token refresh:', error);
+        }
+      }, 10 * 60 * 1000);
+    },
+    stopTokenRefreshTimer() {
+      if (this.refreshIntervalId) {
+        clearInterval(this.refreshIntervalId);
+        this.refreshIntervalId = null;
+      }
     }
   }
 });
