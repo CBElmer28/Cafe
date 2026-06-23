@@ -103,7 +103,7 @@ Sigue estos pasos para poner en marcha el proyecto localmente.
 
 3. Asegúrate de configurar la URL base del backend si se requiere. La aplicación usa `/api` como ruta relativa y un proxy o Axios configurado en [apiClient.js](file:///c:/Users/USUARIO/Desktop/PruebasDeSoftware/Cafe/frontend/src/api/apiClient.js).
 
-4. Levanta el servidor de desarrollo de Vite:
+4. Levanta el servidor de desarrollo de Vite ga:
    ```bash
    npm run dev
    ```
