@@ -57,7 +57,7 @@ jobs:
         if: always()
         working-directory: ./backend
         env:
-          WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL_TEST }}
+          WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
           STATUS: ${{ steps.tests.outcome }}
           EXIT_CODE: ${{ env.EXIT_CODE }}
         run: |
