@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  backend-tests:
+    name: Backend Tests (PHPUnit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, dom, curl, libxml, sqlite3
+          coverage: none
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        working-directory: ./backend
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Prepare Laravel Application
+        working-directory: ./backend
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        id: tests
+        continue-on-error: true 
+        run: |
+          set +e 
+          php artisan test > test_output.log 2>&1
+          TEST_EXIT_CODE=$? 
+          set -e
+          echo "EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV
+          cat test_output.log
+          exit $TEST_EXIT_CODE
+
+      - name: Notify n8n Webhook
+        if: always()
+        working-directory: ./backend
+        env:
+          WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL_TEST }}
+          STATUS: ${{ steps.tests.outcome }}
+          EXIT_CODE: ${{ env.EXIT_CODE }}
+        run: |
+          # Extraemos las últimas 100 líneas del log para no saturar el payload
+          LOG_CONTENT=$(tail -n 100 test_output.log || echo "Sin logs disponibles")
+          
+          # Manejo de casos donde EXIT_CODE esté vacío (ej. error antes de correr las pruebas)
+          if [ -z "$EXIT_CODE" ]; then EXIT_CODE=2; fi
+
+          # Usamos jq para armar el JSON con el exit_code incluido
+          jq -n \
+            --arg status "$STATUS" \
+            --arg exit_code "$EXIT_CODE" \
+            --arg log "$LOG_CONTENT" \
+            --arg repo "${{ github.repository }}" \
+            --arg commit "${{ github.sha }}" \
+            --arg author "${{ github.actor }}" \
+            '{status: $status, exit_code: $exit_code | tonumber, repository: $repo, commit: $commit, author: $author, log: $log}' > payload.json
+            
+          # Enviamos el JSON al cerebro de operaciones (n8n)
+          curl -X POST -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
+
+  frontend-build:
+    name: Frontend Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install NPM Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run Frontend Build
+        working-directory: ./frontend
+        run: npm run build
