@@ -7,21 +7,28 @@ import App from './App.vue'
 
 const app = createApp(App)
 
+// 1. Variable global con un link de respaldo (por si el error ocurre antes de que Clarity inicie)
+let enlaceVideoExacto = "https://clarity.microsoft.com/projects/view/xhw369oig2/recordings";
+
+// 2. Le pedimos a Clarity que nos entregue la "metadata" en cuanto la sesión se cree.
+// Como esto se ejecuta en segundo plano, NUNCA romperá tu frontend.
+if (window.clarity) {
+    window.clarity("metadata", (metadata) => {
+        if (metadata && metadata.projectId && metadata.sessionId) {
+            // Armamos la URL oficial del reproductor de la sesión exacta
+            enlaceVideoExacto = `https://clarity.microsoft.com/player/${metadata.projectId}/${metadata.userId}/${metadata.sessionId}`;
+        }
+    });
+}
+
+// 3. Tu interceptor global (Limpio y 100% a prueba de fallos)
 app.config.errorHandler = (err, instance, info) => {
-
-    let enlaceClarity = "No disponible aún";
-    if (window.clarity) {
-        window.clarity(function () {
-            enlaceClarity = clarity.q.url || "Video en procesamiento";
-        });
-    }
-
     const payloadError = {
         evento: "error_frontend_critico",
         mensaje_error: err.message,
         componente_vue: info,
         url_actual: window.location.href,
-        video_sesion: enlaceClarity
+        video_sesion: enlaceVideoExacto // <--- Ahora inyecta el video exacto del usuario
     };
 
     const N8N_WEBHOOK_ERRORES = "https://n8n.elmerdev.com/webhook/frontend-errores";
@@ -34,6 +41,7 @@ app.config.errorHandler = (err, instance, info) => {
 
     console.error("Vue Error Global:", err);
 };
+
 app.use(createPinia())
 app.use(router)
 

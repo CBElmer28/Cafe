@@ -1,4 +1,9 @@
 <template>
+  <button 
+  @click="forzarErrorPrueba" 
+  style="background: red; color: white; padding: 10px; margin: 20px; border-radius: 5px;">
+  🚨 Forzar Error para n8n
+</button>
   <div class="flex flex-col gap-12">
     <!-- Hero Banner -->
     <header class="relative grid grid-cols-1 md:grid-cols-2 items-center gap-8 p-8 md:p-16 rounded-3xl overflow-hidden glass-panel">
@@ -119,6 +124,12 @@ export default {
       loadProducts
     } = useProducts();
 
+    const forzarErrorPrueba = () => {
+  // Al lanzar (throw) un nuevo Error, el interceptor global de main.js lo atrapará inmediatamente
+  throw new Error("[TEST QA] Calibración de variables para GitHub Issues y Slack.");
+    };
+
+
     const originsOptions = computed(() => {
       const opts = origins.value.map(org => ({ value: org, label: org }));
       return [{ value: '', label: 'Todos los Orígenes' }, ...opts];
@@ -148,6 +159,7 @@ export default {
       roastLevelsOptions,
       clearFilters,
       loadProducts,
+      forzarErrorPrueba,
     };
   },
 };
