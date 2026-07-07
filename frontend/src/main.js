@@ -28,7 +28,7 @@ app.config.errorHandler = (err, instance, info) => {
         mensaje_error: err.message,
         componente_vue: info,
         url_actual: window.location.href,
-        video_sesion: enlaceVideoExacto // <--- Ahora inyecta el video exacto del usuario
+        video_sesion: enlaceVideoExacto // dame un poco de ese chocolate casero
     };
 
     const N8N_WEBHOOK_ERRORES = "https://n8n.elmerdev.com/webhook/frontend-errores";
