@@ -78,7 +78,7 @@ jobs:
             '{status: $status, exit_code: $exit_code | tonumber, repository: $repo, commit: $commit, author: $author, log: $log}' > payload.json
             
           # Enviamos el JSON al cerebro de operaciones (n8n)
-          curl -X POST -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
+          curl -X POST -H "Content-Type: application/json" -d @payload.json $N8N_WEBHOOK_URL_TEST
 
   frontend-build:
     name: Frontend Build Check
