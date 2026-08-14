@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master", "develop"]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master", "develop"]
 
 jobs:
   backend-tests:
@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: "8.2"
           extensions: mbstring, dom, curl, libxml, sqlite3
           coverage: none
 
@@ -43,7 +43,7 @@ jobs:
       - name: Run Backend Tests
         working-directory: ./backend
         id: tests
-        continue-on-error: true 
+        continue-on-error: true
         run: |
           set +e 
           php artisan test > test_output.log 2>&1
@@ -63,7 +63,7 @@ jobs:
         run: |
           # Extraemos las últimas 100 líneas del log para no saturar el payload
           LOG_CONTENT=$(tail -n 100 test_output.log || echo "Sin logs disponibles")
-          
+
           # Manejo de casos donde EXIT_CODE esté vacío (ej. error antes de correr las pruebas)
           if [ -z "$EXIT_CODE" ]; then EXIT_CODE=2; fi
 
@@ -91,7 +91,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Cache Node Modules
         uses: actions/cache@v4
