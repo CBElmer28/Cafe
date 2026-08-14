@@ -61,10 +61,7 @@ jobs:
           STATUS: ${{ steps.tests.outcome }}
           EXIT_CODE: ${{ env.EXIT_CODE }}
         run: |
-          # Extraemos las últimas 100 líneas del log para no saturar el payload
           LOG_CONTENT=$(tail -n 100 test_output.log || echo "Sin logs disponibles")
-
-          # Manejo de casos donde EXIT_CODE esté vacío (ej. error antes de correr las pruebas)
           if [ -z "$EXIT_CODE" ]; then EXIT_CODE=2; fi
 
           # Usamos jq para armar el JSON con el exit_code incluido
@@ -73,9 +70,10 @@ jobs:
             --arg exit_code "$EXIT_CODE" \
             --arg log "$LOG_CONTENT" \
             --arg repo "${{ github.repository }}" \
+            --arg branch "${{ github.ref_name }}" \
             --arg commit "${{ github.sha }}" \
             --arg author "${{ github.actor }}" \
-            '{status: $status, exit_code: $exit_code | tonumber, repository: $repo, commit: $commit, author: $author, log: $log}' > payload.json
+            '{status: $status, exit_code: $exit_code | tonumber, repository: $repo, branch: $branch, commit: $commit, author: $author, log: $log}' > payload.json
             
           # Enviamos el JSON al cerebro de operaciones (n8n)
           curl -X POST -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL

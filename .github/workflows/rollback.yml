@@ -1,0 +1,40 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo del Rollback (Enviado por n8n)'
+        required: true
+        default: 'Fallo crítico detectado en producción'
+
+jobs:
+  rescue-production:
+    name: Revertir Producción
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necesario para tener el historial de commits
+
+      - name: Anunciar inicio del Rollback
+        run: echo "Iniciando Rollback automático. Motivo: ${{ github.event.inputs.reason }}"
+
+      - name: Revertir al commit anterior
+        run: |
+          # Configuramos la identidad del bot de rescate
+          git config --global user.name "n8n Auto-Remediation Bot"
+          git config --global user.email "bot@elmerdev.com"
+          
+          # Deshace el último commit (el que rompió la producción) sin borrar el historial
+          git revert HEAD --no-edit
+          
+          # Empuja la versión estable de vuelta a main
+          git push origin main
+
+      - name: Notificar éxito del Rollback
+        run: echo "El entorno de producción ha sido restaurado a la versión estable anterior."
