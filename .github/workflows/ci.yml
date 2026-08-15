@@ -75,7 +75,7 @@ jobs:
             --arg author "${{ github.actor }}" \
             '{status: $status, exit_code: $exit_code | tonumber, repository: $repo, branch: $branch, commit: $commit, author: $author, log: $log}' > payload.json
             
-          # Enviamos el JSON al cerebro de operaciones (n8n)
+          # Enviamos el JSON al cerebro de operaciones (n8n) aaaaa
           curl -X POST -H "Content-Type: application/json" -d @payload.json $WEBHOOK_URL
 
   frontend-build:
